@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0ebf8;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .wrong {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Your Results</h1>
+
+<div class="card">
+    <h2>Score: {{ score }}/{{ total }}</h2>
+    <h2>Percentage: {{ percentage }}%</h2>
+</div>
+
+{% for item in review_data %}
+
+<div class="card">
+
+    <h3>{{ loop.index }}. {{ item.question }}</h3>
+
+    {% if item.is_correct %}
+        <p class="correct">✅ Correct</p>
+    {% else %}
+        <p class="wrong">❌ Incorrect</p>
+    {% endif %}
+
+    <p><strong>Your Answer:</strong> {{ item.user_answer }}</p>
+    <p><strong>Correct Answer:</strong> {{ item.correct_answer }}</p>
+
+</div>
+
+{% endfor %}
+
+</body>
+</html>

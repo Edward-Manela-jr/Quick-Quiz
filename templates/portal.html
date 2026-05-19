@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Selection Portal</title>
+    <style>
+        body { background: #f0ebf8; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 400px; }
+        .btn { display: block; width: 100%; padding: 15px; margin: 15px 0; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; text-decoration: none; transition: 0.3s; }
+        .admin-btn { background: #673ab7; color: white; }
+        .user-btn { background: #009688; color: white; }
+        .logout-link { color: #666; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Welcome, {{ session['user'] }}</h2>
+        <p>Please select your destination:</p>
+        
+        {% if role == 'admin' %}
+        <a href="/admin" class="btn admin-btn">Go to ADMIN PANEL</a>
+        {% endif %}
+        
+        <a href="/quiz" class="btn user-btn">Take THE QUIZ</a>
+        
+        <br>
+        <a href="/logout" class="logout-link">Logout</a>
+    </div>
+</body>
+</html>

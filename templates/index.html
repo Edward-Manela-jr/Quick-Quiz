@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Examination</title>
+
+    <style>
+        body {
+            background: #f0ebf8;
+            font-family: Arial;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            width: 650px;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .opt-label {
+            display: block;
+            margin: 12px 0;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .opt-label:hover {
+            background: #f9f9f9;
+        }
+
+        .btn {
+            background: #673ab7;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 30px;
+        }
+
+        .btn:hover {
+            background: #5a2ea6;
+        }
+    </style>
+</head>
+
+<script>
+
+    let totalTime = 1 * 60;
+
+    function updateTimer() {
+
+        let minutes = Math.floor(totalTime / 60);
+        let seconds = totalTime % 60;
+
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+
+        document.getElementById('timer').innerHTML =
+            `Time Remaining: ${minutes}:${seconds}`;
+
+        if (totalTime <= 0) {
+
+            alert("Time is up! Your quiz will now be submitted.");
+
+            document.forms[0].submit();
+
+        }
+
+        totalTime--;
+
+    }
+
+    setInterval(updateTimer, 1000);
+
+</script>
+
+
+<body>
+
+    <div class="card" style="background: #673ab7; color: white; text-align: center;">
+        <h1>Quiz Portal</h1>
+        <h2 id="timer" style="margin-top:10px;">
+            Time Remaining: 30:00
+        </h2>
+
+        <p>
+            User: {{ user }}
+            |
+            <a href="/logout" style="color: white;">Logout</a>
+        </p>
+    </div>
+
+    <form action="/submit" method="POST">
+
+        {% for q in questions %}
+
+        <div class="card">
+
+            <p>
+                <strong>{{ loop.index }}. {{ q.text }}</strong>
+                (1 Mark)
+                {% if q.image %}
+                <br><br>
+                <img
+                    src="{{ url_for('static', filename=q.image) }}"
+                    style="max-width: 100%; border-radius: 8px;"
+                >
+                {% endif %}
+            </p>
+
+            {% for opt in q.options %}
+
+            <label class="opt-label">
+                <input
+                    type="radio"
+                    name="question_{{ q.id }}"
+                    value="{{ opt }}"
+                    required
+                >
+
+                {{ opt }}
+            </label>
+
+            {% endfor %}
+
+        </div>
+
+        {% endfor %}
+
+        {% if questions %}
+
+        <button type="submit" class="btn">
+            Submit Assessment
+        </button>
+
+        {% endif %}
+
+    </form>
+
+</body>
+</html>

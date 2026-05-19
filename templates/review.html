@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Review</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0ebf8;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+
+        .wrong {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Student Review</h1>
+
+    <div class="card">
+        <h2>{{ name }}</h2>
+
+        <p>{{ email }}</p>
+
+        <h3>Score: {{ score }}/{{ total }}</h3>
+
+        <h3>Percentage: {{ percentage }}%</h3>
+    </div>
+
+    {% for key, value in answers.items() %}
+
+    <div class="card">
+
+        <h3>{{ key }}</h3>
+
+        <p>
+            <strong>Student Answer:</strong>
+            {{ value.answer }}
+        </p>
+
+        <p>
+            <strong>Correct Answer:</strong>
+            {{ value.correct }}
+        </p>
+
+        {% if value.status == 'Correct' %}
+            <p class="correct">✅ Correct</p>
+        {% else %}
+            <p class="wrong">❌ Wrong</p>
+        {% endif %}
+
+    </div>
+
+    {% endfor %}
+
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results</title>
+    <style>
+        body { background: #f0ebf8; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .score { font-size: 48px; color: #673ab7; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Quiz Submitted!</h1>
+        <p>Your estimated score is:</p>
+        <div class="score">{{ score }} / {{ total }}</div>
+        <br>
+        <a href="/logout">Logout</a>
+    </div>
+</body>
+</html>

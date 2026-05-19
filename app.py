@@ -430,14 +430,38 @@ def student_login():
 
     if request.method == 'POST':
 
-        session['student_name'] = request.form.get('name')
-        session['student_email'] = request.form.get('email')
+        name = request.form.get('name')
+        email = request.form.get('email')
+
+        # Prevent multiple attempts using same email
+        if os.path.exists(CSV_FILE):
+
+            with open(CSV_FILE, 'r') as file:
+
+                reader = csv.reader(file)
+                next(reader, None)
+
+                for row in reader:
+
+                    if len(row) > 1:
+
+                        existing_email = row[1]
+
+                        if existing_email.lower() == email.lower():
+
+                            return """
+                            <h2 style='color:red; text-align:center; margin-top:50px;'>
+                                You have already attempted this quiz.
+                            </h2>
+                            """
+
+        session['student_name'] = name
+        session['student_email'] = email
         session['role'] = 'student'
 
         return redirect(url_for('quiz'))
 
     return render_template('student_login.html')
-
 
 @app.route('/admin-login', methods=['GET', 'POST'])
 def admin_login():

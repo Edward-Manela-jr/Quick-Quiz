@@ -8,8 +8,11 @@ from supabase import create_client
 app = Flask(__name__)
 app.secret_key = 'quiz_secret_key'
 
-# SUPABASE_URL = os.environ.get("https://bbhjqgrbyusylplvbtzi.supabase.co")
-# SUPABASE_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJiaGpxZ3JieXVzeWxwbHZidHppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDQxNzA5MCwiZXhwIjoyMDk1OTkzMDkwfQ.V-qPH2m6DkWxg4NgPyqKQh7NiztDiLooewtF6oYDCdQ")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+print("SUPABASE_URL =", SUPABASE_KEY)
+print("SUPABASE_KEY FOUND=", bool(SUPABASE_KEY))
 
 # supabase = None
 

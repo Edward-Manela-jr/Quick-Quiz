@@ -3,9 +3,20 @@ import csv
 import os
 import json
 from datetime import datetime
+from supabase import create_client
 
 app = Flask(__name__)
 app.secret_key = 'quiz_secret_key'
+
+# SUPABASE_URL = os.environ.get("https://bbhjqgrbyusylplvbtzi.supabase.co")
+# SUPABASE_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJiaGpxZ3JieXVzeWxwbHZidHppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDQxNzA5MCwiZXhwIjoyMDk1OTkzMDkwfQ.V-qPH2m6DkWxg4NgPyqKQh7NiztDiLooewtF6oYDCdQ")
+
+# supabase = None
+
+# if SUPABASE_URL and SUPABASE_KEY:
+#     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
 
 CSV_FILE = 'results.csv'
 
@@ -14,396 +25,176 @@ admin_db = {
 }
 
 quiz_data = [
-    {
+        {
         "id": 1,
-        "text": "What does ENSO stand for?",
+        "text": "Which gas makes up the largest percentage of the Earth's atmosphere?",
         "options": [
-            "Eastern Northern Seasonal Oscillation",
-            "El Niño Southern Oscillation",
-            "Equatorial Neutral Sea Oscillation",
-            "Environmental Northern Sea Oscillation"
+            "Oxygen",
+            "Carbon Dioxide",
+            "Nitrogen",
+            "Argon"
         ],
-        "correct": "El Niño Southern Oscillation"
+        "correct": "Nitrogen"
     },
 
     {
         "id": 2,
-        "text": "What does MJO stand for?",
+        "text": "Which atmospheric layer contains most weather phenomena?",
         "options": [
-            "Major Jet Oscillation",
-            "Monsoon Jet Organisation",
-            "Madden Julian Oscillation",
-            "Marine Julian Oscillation"
+            "Stratosphere",
+            "Troposphere",
+            "Mesosphere",
+            "Thermosphere"
         ],
-        "correct": "Madden Julian Oscillation"
+        "correct": "Troposphere"
     },
+
     {
-    "id": 3,
-    "text": "In which layer of the atmosphere does weather occur?",
-    "options": [
-        "Stratosphere",
-        "Troposphere",
-        "Stratopause",
-        "Thermosphere"
-    ],
-    "correct": "Troposphere"
-},
+        "id": 3,
+        "text": "What is the average environmental lapse rate in the troposphere?",
+        "options": [
+            "3.5°C/km",
+            "5.0°C/km",
+            "6.5°C/km",
+            "9.8°C/km"
+        ],
+        "correct": "6.5°C/km"
+    },
 
-{
-    "id": 4,
-    "text": "Which part of the climate system do snow, sea ice, glaciers and ice sheets form?",
-    "options": [
-        "Hydrosphere",
-        "Biosphere",
-        "Atmosphere",
-        "Cryosphere"
-    ],
-    "correct": "Cryosphere"
-},
+    {
+        "id": 4,
+        "text": "Which variable gas is most important for weather processes?",
+        "options": [
+            "Ozone",
+            "Methane",
+            "Helium",
+            "Water Vapour"
+        ],
+        "correct": "Water Vapour"
+    },
 
-{
-    "id": 5,
-    "text": "The rate at which temperature changes with height is called:",
-    "options": [
-        "Lapse rate",
-        "Energy balance",
-        "Coriolis force",
-        "Tropopause"
-    ],
-    "correct": "Lapse rate"
-},
+    {
+        "id": 5,
+        "text": "The upper boundary of the troposphere is known as the:",
+        "options": [
+            "Mesopause",
+            "Stratopause",
+            "Tropopause",
+            "Thermopause"
+        ],
+        "correct": "Tropopause"
+    },
 
-{
-    "id": 6,
-    "text": "What are the components of the climate system?",
-    "options": [
-        "Troposphere, stratosphere, mesosphere, thermosphere, atmosphere",
-        "Cryosphere, stratosphere, mesosphere, thermosphere, Biosphere",
-        "Atmosphere, biosphere, cryosphere, hydrosphere, lithosphere",
-        "Biosphere, lithosphere, mesosphere, thermosphere, atmosphere"
-    ],
-    "correct": "Atmosphere, biosphere, cryosphere, hydrosphere, lithosphere"
-},
+    {
+        "id": 6,
+        "text": "Why does temperature increase with height in the stratosphere?",
+        "options": [
+            "Increased atmospheric pressure",
+            "Absorption of solar radiation by ozone",
+            "Presence of water vapour",
+            "Earth's surface heating"
+        ],
+        "correct": "Absorption of solar radiation by ozone"
+    },
 
-{
-    "id": 7,
-    "text": "Which Ocean is primarily associated with ENSO events?",
-    "options": [
-        "Atlantic Ocean",
-        "Indian Ocean",
-        "Pacific Ocean",
-        "Arctic Ocean"
-    ],
-    "correct": "Pacific Ocean"
-},
-{
-    "id": 8,
-    "text": "What is the warm phase of ENSO called?",
-    "options": [
-        "Trade wind",
-        "La Niña",
-        "Monsoon",
-        "El Niño"
-    ],
-    "correct": "El Niño"
-},
+    {
+        "id": 7,
+        "text": "Most meteors burn up in which atmospheric layer?",
+        "options": [
+            "Troposphere",
+            "Stratosphere",
+            "Mesosphere",
+            "Exosphere"
+        ],
+        "correct": "Mesosphere"
+    },
 
-{
-    "id": 9,
-    "text": "Which of the following is the largest contributor to human-induced global warming?",
-    "options": [
-        "Oxygen",
-        "Nitrogen",
-        "Carbon dioxide",
-        "Helium"
-    ],
-    "correct": "Carbon dioxide"
-},
+    {
+        "id": 8,
+        "text": "Which atmospheric layer contains the ionosphere and auroras?",
+        "options": [
+            "Mesosphere",
+            "Thermosphere",
+            "Stratosphere",
+            "Troposphere"
+        ],
+        "correct": "Thermosphere"
+    },
 
-{
-    "id": 10,
-    "text": "Which greenhouse gas is primarily produced from livestock and rice cultivation?",
-    "options": [
-        "Methane (CH4)",
-        "Oxygen (O2)",
-        "Hydrogen (H2)",
-        "Neon (Ne)"
-    ],
-    "correct": "Methane (CH4)"
-},
+    {
+        "id": 9,
+        "text": "A pressure of approximately 998 hPa is generally associated with:",
+        "options": [
+            "Strong high pressure",
+            "Average sea-level pressure",
+            "Moderately low pressure",
+            "Deep storm system only"
+        ],
+        "correct": "Moderately low pressure"
+    },
 
-{
-    "id": 11,
-    "text": "Which sector is a major source of greenhouse gas emissions globally?",
-    "options": [
-        "Agriculture",
-        "Industrial processes",
-        "Energy",
-        "All of the above"
-    ],
-    "correct": "All of the above"
-},
+    {
+        "id": 10,
+        "text": "Why are jet streams important in forecasting?",
+        "options": [
+            "They increase atmospheric pressure",
+            "They determine ocean currents",
+            "They steer storms and influence severe weather development",
+            "They generate ozone in the stratosphere"
+        ],
+        "correct": "They steer storms and influence severe weather development"
+    },
 
-{
-    "id": 12,
-    "text": "Ocean currents primarily help to redistribute:",
-    "options": [
-        "Rocks and sediments only",
-        "Heat energy around the Earth",
-        "Earth’s magnetic field",
-        "Solar radiation from space"
-    ],
-    "correct": "Heat energy around the Earth"
-},
-{
-    "id": 13,
-    "text": "The transfer of heat from the ocean to the atmosphere through evaporation is mainly in the form of:",
-    "options": [
-        "Latent heat",
-        "Nuclear energy",
-        "Gravitational energy",
-        "Mechanical energy only"
-    ],
-    "correct": "Latent heat"
-},
+    {
+        "id": 11,
+        "text": "The atmosphere is held around the Earth by gravity.",
+        "options": [
+            "True",
+            "False"
+        ],
+        "correct": "True"
+    },
 
-{
-    "id": 14,
-    "text": "Which ocean current is typically warm and influences coastal climates by increasing temperatures?",
-    "options": [
-        "Cold currents",
-        "Deep ocean currents only",
-        "Warm currents",
-        "Subsurface currents only"
-    ],
-    "correct": "Warm currents"
-},
+    {
+        "id": 12,
+        "text": "Oxygen is the most abundant gas in the atmosphere.",
+        "options": [
+            "True",
+            "False"
+        ],
+        "correct": "False"
+    },
 
-{
-    "id": 15,
-    "text": "Upwelling in the ocean brings:",
-    "options": [
-        "Warm surface water downward",
-        "Cold, nutrient-rich water to the surface",
-        "Atmospheric gases into the ocean",
-        "Freshwater into deep ocean basins"
-    ],
-    "correct": "Cold, nutrient-rich water to the surface"
-},
+    {
+        "id": 13,
+        "text": "Water vapour acts as a greenhouse gas and contributes to cloud formation.",
+        "options": [
+            "True",
+            "False"
+        ],
+        "correct": "True"
+    },
 
-{
-    "id": 16,
-    "text": "_________ is the main force that drives surface ocean currents.",
-    "options": [
-        "Earthquakes",
-        "Volcanoes",
-        "Lunar tides only",
-        "Wind patterns"
-    ],
-    "correct": "Wind patterns"
-},
+    {
+        "id": 14,
+        "text": "Atmospheric pressure increases with altitude.",
+        "options": [
+            "True",
+            "False"
+        ],
+        "correct": "False"
+    },
 
-{
-    "id": 17,
-    "text": "The Coriolis effect influences ocean currents by:",
-    "options": [
-        "Increasing ocean salinity",
-        "Heating ocean water directly",
-        "Deflecting currents due to Earth’s rotation",
-        "Stopping all ocean movement"
-    ],
-    "correct": "Deflecting currents due to Earth’s rotation"
-},
-{
-    "id": 18,
-    "text": "According to WMO, what distinguishes climate change from climate variability?",
-    "options": [
-        "Climate change is driven entirely by the moon’s gravity",
-        "Climate change persists for extended periods, typically decades or longer",
-        "Climate change only affects the ocean, not the atmosphere",
-        "Climate change is completely reversible within 2 – 7 years"
-    ],
-    "correct": "Climate change persists for extended periods, typically decades or longer"
-},
+    {
+        "id": 15,
+        "text": "Aviation meteorologists monitor turbulence, wind shear, icing, and jet streams to support flight safety.",
+        "options": [
+            "True",
+            "False"
+        ],
+        "correct": "True"
+    }
 
-{
-    "id": 19,
-    "text": "How often do ENSO events generally occur?",
-    "options": [
-        "Every 2 – 7 years",
-        "Once every century",
-        "Every 20 years",
-        "Every month"
-    ],
-    "correct": "Every 2 – 7 years"
-},
-
-{
-    "id": 20,
-    "text": "Approximately how long does one complete MJO cycle take?",
-    "options": [
-        "1 – 3 days",
-        "7 – 10 days",
-        "2 – 3 years",
-        "30 – 60 days"
-    ],
-    "correct": "30 – 60 days"
-},
-
-{
-    "id": 21,
-    "text": "The Madden-Julian Oscillation (MJO) mainly affects weather patterns in the:",
-    "options": [
-        "Tropics",
-        "Polar regions",
-        "Mediterranean region",
-        "Arctic Ocean"
-    ],
-    "correct": "Tropics"
-},
-
-{
-    "id": 22,
-    "text": "ENSO events can influence:",
-    "options": [
-        "Global weather and climate patterns",
-        "Only ocean temperatures",
-        "Only rainfall in Europe",
-        "Earthquakes and volcanoes directly"
-    ],
-    "correct": "Global weather and climate patterns"
-},
-{
-    "id": 23,
-    "text": "During a La Niña event, sea surface temperatures in the central and eastern Pacific Ocean are generally:",
-    "options": [
-        "Warmer than average",
-        "Cooler than average",
-        "Unchanged",
-        "Extremely hot everywhere"
-    ],
-    "correct": "Cooler than average"
-},
-
-{
-    "id": 24,
-    "text": "MJO is characterised by:",
-    "options": [
-        "Changes in ocean salinity only",
-        "Permanent cooling of the atmosphere",
-        "Westward movement of hurricanes only",
-        "Eastward movement of clouds, rainfall, winds and pressure"
-    ],
-    "correct": "Eastward movement of clouds, rainfall, winds and pressure"
-},
-
-{
-    "id": 25,
-    "text": "The MJO can influence:",
-    "options": [
-        "Only earthquakes",
-        "Ocean tides only",
-        "Tropical rainfall and cyclone activity",
-        "Solar radiation directly"
-    ],
-    "correct": "Tropical rainfall and cyclone activity"
-},
-
-{
-    "id": 26,
-    "text": "El Niño conditions are typically associated with:",
-    "options": [
-        "Stronger than normal trade winds",
-        "Weakened trade winds in the Pacific",
-        "Cooler ocean temperatures in the Pacific",
-        "Increased snowfall everywhere in the world"
-    ],
-    "correct": "Weakened trade winds in the Pacific"
-},
-
-{
-    "id": 27,
-    "text": "Which atmospheric pressure pattern is linked to ENSO?",
-    "options": [
-        "Southern Oscillation",
-        "North Atlantic Oscillation",
-        "Arctic Oscillation",
-        "Indian Ocean Dipole"
-    ],
-    "correct": "Southern Oscillation"
-},
-{
-    "id": 28,
-    "text": "The Ekman spiral dictates that surface water transport is deflected at what angle to the prevailing wind?",
-    "options": [
-        "0° (parallel)",
-        "45°",
-        "90° (right angle)",
-        "180° (opposite)"
-    ],
-    "correct": "90° (right angle)"
-},
-
-{
-    "id": 29,
-    "text": "Which ENSO phase is often linked to enhanced rainfall in some parts of southern Africa?",
-    "options": [
-        "El Niño",
-        "Neutral phase",
-        "Monsoon phase",
-        "La Niña"
-    ],
-    "correct": "La Niña"
-},
-
-{
-    "id": 30,
-    "text": "Which of the following is a possible effect of El Niño over Zambia?",
-    "options": [
-        "Reduced atmospheric circulation",
-        "Permanent climate change",
-        "Increased dry spells/drought",
-        "None of the above"
-    ],
-    "correct": "Increased dry spells/drought"
-},
-
-{
-    "id": 31,
-    "text": "How does a Positive Indian Ocean Dipole (IOD) uniquely affect Zambia’s rainfall patterns?",
-    "options": [
-        "Increases rainfall across the entire country",
-        "Increases rainfall in the Northeast, suppresses it in the south",
-        "Suppresses rainfall in the Northeast, increases in the South",
-        "Has no measurable effect"
-    ],
-    "correct": "Increases rainfall in the Northeast, suppresses it in the south"
-},
-
-{
-    "id": 32,
-    "text": "Figure 1 below displays rainfall totals for February from 1935 to 1985 for a hypothetical observation station. What does this figure depict?",
-    "image": "q32.png",
-    "options": [
-        "Ozone depletion",
-        "Global warming only",
-        "Climate Change",
-        "Climate variability"
-    ],
-    "correct": "Climate variability"
-},
-{
-    "id": 33,
-    "text": "Figure 2 below shows annual rainfall totals at a hypothetical weather observation station. What does this plot depict?",
-    "image": "q33.png",
-    "options": [
-        "Ozone depletion",
-        "Climate change",
-        "Climate variability and climate change",
-        "Climate variability"
-    ],
-    "correct": "Climate variability and climate change"
-}
     # ADD THE REST OF YOUR QUESTIONS HERE
 ]
 
@@ -434,12 +225,12 @@ def student_login():
         email = request.form.get('email')
 
         # Prevent multiple attempts using same email
+        # Prevent multiple attempts using same email
         if os.path.exists(CSV_FILE):
 
             with open(CSV_FILE, 'r') as file:
 
                 reader = csv.reader(file)
-                next(reader, None)
 
                 for row in reader:
 
@@ -529,6 +320,7 @@ def submit():
 
     percentage = round((score / total) * 100, 2)
 
+    # SAVE RESULT TO CSV
     with open(CSV_FILE, 'a', newline='') as file:
         writer = csv.writer(file)
 
@@ -562,9 +354,14 @@ def admin():
     with open(CSV_FILE, 'r') as file:
 
         reader = csv.reader(file)
-        next(reader)
+
+        # Skip header row
+        next(reader, None)
 
         for index, row in enumerate(reader):
+
+            if len(row) < 7:
+                continue
 
             results.append({
                 'id': index,
@@ -577,6 +374,8 @@ def admin():
                 'date': row[6]
             })
 
+    
+    print(results)
     return render_template('admin.html', results=results)
 
 
@@ -588,9 +387,14 @@ def review(result_id):
 
     with open(CSV_FILE, 'r') as file:
 
-        reader = list(csv.reader(file))
+        reader = csv.reader(file)
 
-        row = reader[result_id + 1]
+        # Skip header row
+        next(reader, None)
+
+        rows = list(reader)
+
+        row = rows[result_id]
 
         answers = json.loads(row[5])
 

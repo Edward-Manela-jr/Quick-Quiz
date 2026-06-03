@@ -375,31 +375,18 @@ def admin():
 
     results = []
 
-    with open(CSV_FILE, 'r') as file:
+    try:
 
-        reader = csv.reader(file)
+        response = supabase.table("quiz_results2") \
+            .select("*") \
+            .order("id", desc=True) \
+            .execute()
 
-        # Skip header row
-        next(reader, None)
+        results = response.data
 
-        for index, row in enumerate(reader):
+    except Exception as e:
+        print("ADMIN ERROR:", e)
 
-            if len(row) < 7:
-                continue
-
-            results.append({
-                'id': index,
-                'name': row[0],
-                'email': row[1],
-                'score': row[2],
-                'total': row[3],
-                'percentage': row[4],
-                'answers': row[5],
-                'date': row[6]
-            })
-
-    
-    print(results)
     return render_template('admin.html', results=results)
 
 
@@ -409,29 +396,32 @@ def review(result_id):
     if session.get('role') != 'admin':
         return redirect(url_for('landing'))
 
-    with open(CSV_FILE, 'r') as file:
+    try:
 
-        reader = csv.reader(file)
+        response = supabase.table("quiz_results2") \
+            .select("*") \
+            .eq("id", result_id) \
+            .execute()
 
-        # Skip header row
-        next(reader, None)
+        if not response.data:
+            return "Record not found"
 
-        rows = list(reader)
+        row = response.data[0]
 
-        row = rows[result_id]
-
-        answers = json.loads(row[5])
+        answers = json.loads(row['answers'])
 
         return render_template(
             'review.html',
-            name=row[0],
-            email=row[1],
-            score=row[2],
-            total=row[3],
-            percentage=row[4],
+            name=row['name'],
+            email=row['email'],
+            score=row['score'],
+            total=row['total'],
+            percentage=row['percentage'],
             answers=answers
         )
 
+    except Exception as e:
+        return f"Review Error: {e}"
 
 @app.route('/download-csv')
 def download_csv():

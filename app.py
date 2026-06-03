@@ -324,6 +324,26 @@ def submit():
 
     percentage = round((score / total) * 100, 2)
 
+
+    # SAVE RESULT TO SUPABASE
+    # Save to Supabase
+    if supabase:
+        try:
+            supabase.table("quiz_results2").insert({
+                "name": session['student_name'],
+                "email": session['student_email'],
+                "score": score,
+                "total": total,
+                "percentage": percentage,
+                "answers": json.dumps(answers_data),
+                "date": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }).execute()
+
+            print("Saved to Supabase")
+
+        except Exception as e:
+            print("SUPABASE ERROR:", e)
+
     # SAVE RESULT TO CSV
     with open(CSV_FILE, 'a', newline='') as file:
         writer = csv.writer(file)

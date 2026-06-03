@@ -11,15 +11,16 @@ app.secret_key = 'quiz_secret_key'
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-print("SUPABASE_URL =", SUPABASE_KEY)
-print("SUPABASE_KEY FOUND=", bool(SUPABASE_KEY))
+print("SUPABASE_URL FOUND =", bool(SUPABASE_URL))
+print("SUPABASE_KEY FOUND =", bool(SUPABASE_KEY))
 
-# supabase = None
+supabase = None
 
-# if SUPABASE_URL and SUPABASE_KEY:
-#     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    print("Supabase connected successfully")
+else:
+    print("Supabase credentials missing")
 
 CSV_FILE = 'results.csv'
 

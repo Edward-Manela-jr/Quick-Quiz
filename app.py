@@ -24,6 +24,9 @@ else:
 
 CSV_FILE = 'results.csv'
 
+# QUIZ_OPEN = True
+QUIZ_OPEN = False
+
 admin_db = {
     "admin": "123"
 }
@@ -222,6 +225,9 @@ def landing():
 
 @app.route('/student', methods=['GET', 'POST'])
 def student_login():
+
+    if not QUIZ_OPEN:
+        return render_template('quiz_closed.html')
 
     if request.method == 'POST':
 

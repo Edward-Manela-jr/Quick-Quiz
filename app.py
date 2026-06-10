@@ -24,186 +24,161 @@ else:
 
 CSV_FILE = 'results.csv'
 
-# QUIZ_OPEN = True
-QUIZ_OPEN = False
+QUIZ_OPEN = True
+#QUIZ_OPEN = False
 
 admin_db = {
     "admin": "123"
 }
 
 quiz_data = [
-        {
-        "id": 1,
-        "text": "Which gas makes up the largest percentage of the Earth's atmosphere?",
-        "options": [
-            "Oxygen",
-            "Carbon Dioxide",
-            "Nitrogen",
-            "Argon"
-        ],
-        "correct": "Nitrogen"
-    },
+{
+"id": 1,
+"text": "Which statement best describes the relationship between air temperature and air density?",
+"options": [
+"Density increases when temperature increases",
+"Density decreases when temperature increases",
+"Density remains constant with temperature changes",
+"Density only depends on humidity"
+],
+"correct": "Density decreases when temperature increases"
+},
 
-    {
-        "id": 2,
-        "text": "Which atmospheric layer contains most weather phenomena?",
-        "options": [
-            "Stratosphere",
-            "Troposphere",
-            "Mesosphere",
-            "Thermosphere"
-        ],
-        "correct": "Troposphere"
-    },
 
-    {
-        "id": 3,
-        "text": "What is the average environmental lapse rate in the troposphere?",
-        "options": [
-            "3.5°C/km",
-            "5.0°C/km",
-            "6.5°C/km",
-            "9.8°C/km"
-        ],
-        "correct": "6.5°C/km"
-    },
+{
+    "id": 2,
+    "text": "If atmospheric pressure increases while temperature remains constant, the air density will:",
+    "options": [
+        "Decrease",
+        "Remain unchanged",
+        "Increase",
+        "Become zero"
+    ],
+    "correct": "Increase"
+},
 
-    {
-        "id": 4,
-        "text": "Which variable gas is most important for weather processes?",
-        "options": [
-            "Ozone",
-            "Methane",
-            "Helium",
-            "Water Vapour"
-        ],
-        "correct": "Water Vapour"
-    },
+{
+    "id": 3,
+    "text": "Which atmospheric condition produces the LOWEST air density?",
+    "options": [
+        "Cold and dry air",
+        "Cold and moist air",
+        "Warm and dry air",
+        "Warm and humid air"
+    ],
+    "correct": "Warm and humid air"
+},
 
-    {
-        "id": 5,
-        "text": "The upper boundary of the troposphere is known as the:",
-        "options": [
-            "Mesopause",
-            "Stratopause",
-            "Tropopause",
-            "Thermopause"
-        ],
-        "correct": "Tropopause"
-    },
+{
+    "id": 4,
+    "text": "According to the Ideal Gas Law, air density is proportional to pressure and inversely proportional to temperature.  p = P/(RT) If pressure remains constant and temperature increases, density will:",
+    "options": [
+        "Increase",
+        "Decrease",
+        "Stay constant",
+        "Double automatically"
+    ],
+    "correct": "Decrease"
+},
 
-    {
-        "id": 6,
-        "text": "Why does temperature increase with height in the stratosphere?",
-        "options": [
-            "Increased atmospheric pressure",
-            "Absorption of solar radiation by ozone",
-            "Presence of water vapour",
-            "Earth's surface heating"
-        ],
-        "correct": "Absorption of solar radiation by ozone"
-    },
+{
+    "id": 5,
+    "text": "An aerodrome reports Pressure = 1000 hPa and Temperature = 20°C. Later, temperature rises to 35°C while pressure remains unchanged. What happens to density altitude?",
+    "options": [
+        "Decreases",
+        "Remains unchanged",
+        "Increases",
+        "Becomes negative"
+    ],
+    "correct": "Increases"
+},
 
-    {
-        "id": 7,
-        "text": "Most meteors burn up in which atmospheric layer?",
-        "options": [
-            "Troposphere",
-            "Stratosphere",
-            "Mesosphere",
-            "Exosphere"
-        ],
-        "correct": "Mesosphere"
-    },
+{
+    "id": 6,
+    "text": "Which statement about humidity and air density is CORRECT?",
+    "options": [
+        "Humid air is heavier than dry air",
+        "Dry air is less dense than humid air",
+        "Humid air is less dense than dry air",
+        "Humidity has no effect on density"
+    ],
+    "correct": "Humid air is less dense than dry air"
+},
 
-    {
-        "id": 8,
-        "text": "Which atmospheric layer contains the ionosphere and auroras?",
-        "options": [
-            "Mesosphere",
-            "Thermosphere",
-            "Stratosphere",
-            "Troposphere"
-        ],
-        "correct": "Thermosphere"
-    },
+{
+    "id": 7,
+    "text": "Calculate the approximate air density using p = P/(RT), where P = 100000 Pa, R = 287 J kg⁻¹ K⁻¹ and T = 300 K.",
+    "options": [
+        "0.86 kg/m³",
+        "1.16 kg/m³",
+        "2.50 kg/m³",
+        "3.48 kg/m³"
+    ],
+    "correct": "1.16 kg/m³"
+},
 
-    {
-        "id": 9,
-        "text": "A pressure of approximately 998 hPa is generally associated with:",
-        "options": [
-            "Strong high pressure",
-            "Average sea-level pressure",
-            "Moderately low pressure",
-            "Deep storm system only"
-        ],
-        "correct": "Moderately low pressure"
-    },
+{
+    "id": 8,
+    "text": "At a high-elevation airport, aircraft performance is poor mainly because:",
+    "options": [
+        "Air density is higher",
+        "Air density is lower",
+        "Humidity is always zero",
+        "Pressure increases rapidly"
+    ],
+    "correct": "Air density is lower"
+},
 
-    {
-        "id": 10,
-        "text": "Why are jet streams important in forecasting?",
-        "options": [
-            "They increase atmospheric pressure",
-            "They determine ocean currents",
-            "They steer storms and influence severe weather development",
-            "They generate ozone in the stratosphere"
-        ],
-        "correct": "They steer storms and influence severe weather development"
-    },
+{
+    "id": 9,
+    "text": "Standard atmospheric pressure at mean sea level used in aviation meteorology is:",
+    "options": [
+        "950 hPa",
+        "1000 hPa",
+        "1013.25 hPa",
+        "1030 hPa"
+    ],
+    "correct": "1013.25 hPa"
+},
 
-    {
-        "id": 11,
-        "text": "The atmosphere is held around the Earth by gravity.",
-        "options": [
-            "True",
-            "False"
-        ],
-        "correct": "True"
-    },
+{
+    "id": 10,
+    "text": "A parcel of air has high temperature, low pressure and high humidity. These conditions together will produce:",
+    "options": [
+        "Very high density",
+        "Moderate density",
+        "Low density",
+        "No effect on aircraft operations"
+    ],
+    "correct": "Low density"
+},
 
-    {
-        "id": 12,
-        "text": "Oxygen is the most abundant gas in the atmosphere.",
-        "options": [
-            "True",
-            "False"
-        ],
-        "correct": "False"
-    },
+{
+    "id": 11,
+    "text": "The temperature at an airport increases from 15°C to 30°C while pressure stays constant. What is the approximate effect on aircraft take-off performance?",
+    "options": [
+        "Take-off distance decreases",
+        "Aircraft lift increases significantly",
+        "Take-off distance increases due to lower density",
+        "No change in performance"
+    ],
+    "correct": "Take-off distance increases due to lower density"
+},
 
-    {
-        "id": 13,
-        "text": "Water vapour acts as a greenhouse gas and contributes to cloud formation.",
-        "options": [
-            "True",
-            "False"
-        ],
-        "correct": "True"
-    },
+{
+    "id": 12,
+    "text": "An aircraft flying from South America to Southern Africa encounters strong easterly Trade Winds. What effect are these winds most likely to have on an aircraft flying westward?",
+    "options": [
+        "Increase ground speed",
+        "Cause a tailwind",
+        "Decrease ground speed due to a headwind",
+        "Have no effect on flight time"
+    ],
+    "correct": "Decrease ground speed due to a headwind"
+}
 
-    {
-        "id": 14,
-        "text": "Atmospheric pressure increases with altitude.",
-        "options": [
-            "True",
-            "False"
-        ],
-        "correct": "False"
-    },
-
-    {
-        "id": 15,
-        "text": "Aviation meteorologists monitor turbulence, wind shear, icing, and jet streams to support flight safety.",
-        "options": [
-            "True",
-            "False"
-        ],
-        "correct": "True"
-    }
-
-    # ADD THE REST OF YOUR QUESTIONS HERE
 ]
+
 
 if not os.path.exists(CSV_FILE):
     with open(CSV_FILE, 'w', newline='') as file:

@@ -24,8 +24,8 @@ else:
 
 CSV_FILE = 'results.csv'
 
-QUIZ_OPEN = True
-#QUIZ_OPEN = False
+#QUIZ_OPEN = True
+QUIZ_OPEN = False
 
 admin_db = {
     "admin": "123"

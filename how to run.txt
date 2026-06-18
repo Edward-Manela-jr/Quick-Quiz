@@ -4,3 +4,17 @@
 
 3. python app.py
 
+
+git status
+
+git add .
+
+git commit -m "Replace quiz with density and pressure questions"
+
+GIT_ASKPASS= git push origin main
+
+
+
+git add app.py templates/student_login.html
+
+git commit -m "Replace quiz with density and pressure questions"

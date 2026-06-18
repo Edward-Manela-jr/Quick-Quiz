@@ -1,45 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Admin Dashboard</title>
+    <meta charset="UTF-8">
+    <title>ZMD Quiz Administration</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
+
 <body>
 
-<h1>Admin Dashboard</h1>
+<div class="container">
 
-<a href="/download-csv">Download CSV</a>
-|
-<a href="/logout">Logout</a>
+    <header>
 
-<br><br>
+        <h1>ZMD Quiz Administration</h1>
 
-<table border="1" cellpadding="10">
+        <div class="header-links">
+            <a href="/download-csv">Download Results</a>
+            <a href="/logout">Logout</a>
+        </div>
 
-<tr>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Score</th>
-    <th>Total</th>
-    <th>Percentage</th>
-    <th>Date</th>
-    <th>Review</th>
-</tr>
+    </header>
 
-{% for r in results %}
-<tr>
-    <td>{{ r.name }}</td>
-    <td>{{ r.email }}</td>
-    <td>{{ r.score }}</td>
-    <td>{{ r.total }}</td>
-    <td>{{ r.percentage }}%</td>
-    <td>{{ r.date }}</td>
-    <td>
-        <a href="/review/{{ r.id }}">View</a>
-    </td>
-</tr>
-{% endfor %}
+    <section class="status-panel">
 
-</table>
+        <h2>Quiz Status</h2>
+
+        {% if quiz_open %}
+            <p class="status-open">OPEN</p>
+        {% else %}
+            <p class="status-closed">CLOSED</p>
+        {% endif %}
+
+        <form action="/open-quiz" method="POST" style="display:inline;">
+            <button class="btn btn-open" {% if quiz_open %}disabled{% endif %}>
+                Open Quiz
+            </button>
+        </form>
+
+        <form action="/close-quiz" method="POST" style="display:inline;">
+            <button class="btn btn-close" {% if not quiz_open %}disabled{% endif %}>
+                Close Quiz
+            </button>
+        </form>
+
+    </section>
+
+    <section class="cards">
+
+        <div class="card">
+            <div class="title">Participants</div>
+            <div class="value">{{ total_participants }}</div>
+        </div>
+
+        <div class="card">
+            <div class="title">Average Score</div>
+            <div class="value">{{ average_score }}%</div>
+        </div>
+
+        <div class="card">
+            <div class="title">Highest Score</div>
+            <div class="value">{{ highest_score }}%</div>
+        </div>
+
+        <div class="card">
+            <div class="title">Latest Submission</div>
+            <div class="small">{{ latest_submission }}</div>
+        </div>
+
+    </section>
+
+    <section>
+
+        <h2>Results</h2>
+
+        <table>
+
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Score</th>
+                <th>Total</th>
+                <th>Percentage</th>
+                <th>Date</th>
+                <th>Review</th>
+            </tr>
+
+            {% for r in results %}
+
+            <tr>
+
+                <td>{{ r.name }}</td>
+                <td>{{ r.email }}</td>
+                <td>{{ r.score }}</td>
+                <td>{{ r.total }}</td>
+                <td>{{ r.percentage }}%</td>
+                <td>{{ r.date }}</td>
+
+                <td>
+                    <a href="/review/{{ r.id }}">View</a>
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </section>
+
+</div>
 
 </body>
+
 </html>

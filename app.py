@@ -4,9 +4,12 @@ import os
 import json
 from datetime import datetime
 from supabase import create_client
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.secret_key = 'quiz_secret_key'
+
+load_dotenv()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
@@ -201,8 +204,12 @@ def landing():
 @app.route('/student', methods=['GET', 'POST'])
 def student_login():
 
-    if not QUIZ_OPEN:
-        return render_template('quiz_closed.html')
+    setting = supabase.table("quiz_settings").select("quiz_open").eq("id", 1).execute()
+    quiz_open = setting.data[0]["quiz_open"]
+
+    if not quiz_open:
+        return render_template("quiz_closed.html")
+
 
     if request.method == 'POST':
 
@@ -358,6 +365,15 @@ def admin():
 
     try:
 
+        # Read quiz status
+        setting = supabase.table("quiz_settings") \
+            .select("quiz_open") \
+            .eq("id", 1) \
+            .execute()
+
+        quiz_open = setting.data[0]["quiz_open"]
+
+        # Read quiz results
         response = supabase.table("quiz_results2") \
             .select("*") \
             .order("id", desc=True) \
@@ -365,10 +381,72 @@ def admin():
 
         results = response.data
 
+        # Dashboard statistics
+        total_participants = len(results)
+
+        if total_participants > 0:
+
+            average_score = round(
+                sum(r["percentage"] for r in results) / total_participants,
+                2
+            )
+
+            highest_score = max(r["percentage"] for r in results)
+
+            latest_submission = results[0]["date"]
+
+        else:
+
+            average_score = 0
+            highest_score = 0
+            latest_submission = "N/A"
+
+
+
     except Exception as e:
         print("ADMIN ERROR:", e)
+        quiz_open = False
 
-    return render_template('admin.html', results=results)
+    return render_template(
+    'admin.html',
+    results=results,
+    quiz_open=quiz_open,
+    total_participants=total_participants,
+    average_score=average_score,
+    highest_score=highest_score,
+    latest_submission=latest_submission
+)
+
+
+
+@app.route('/open-quiz', methods=['POST'])
+def open_quiz():
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('landing'))
+
+    supabase.table("quiz_settings") \
+        .update({"quiz_open": True}) \
+        .eq("id", 1) \
+        .execute()
+
+    return redirect(url_for('admin'))
+
+
+@app.route('/close-quiz', methods=['POST'])
+def close_quiz():
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('landing'))
+
+    supabase.table("quiz_settings") \
+        .update({"quiz_open": False}) \
+        .eq("id", 1) \
+        .execute()
+
+    return redirect(url_for('admin'))
+
+
 
 
 @app.route('/review/<int:result_id>')

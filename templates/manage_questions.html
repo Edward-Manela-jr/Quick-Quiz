@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Manage Questions</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/admin.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+
+<h1>{{ quiz.title }}</h1>
+
+<div class="header-links">
+
+<a href="/manage-quiz">Back</a>
+
+<a href="/logout">Logout</a>
+
+</div>
+
+</header>
+
+<h2>Questions</h2>
+
+<table>
+
+<tr>
+
+<th>Order</th>
+
+<th>Question</th>
+
+<th>Type</th>
+
+<th>Actions</th>
+
+</tr>
+
+{% for q in questions %}
+
+<tr>
+
+<td>{{ q.display_order }}</td>
+
+<td>{{ q.question }}</td>
+
+<td>{{ q.question_type }}</td>
+
+<td>
+
+<a href="/edit-question/{{ q.id }}">
+    <button>Edit</button>
+</a>
+    
+<a
+href="/delete-question/{{ q.id }}"
+onclick="return confirm('Are you sure you want to delete this question?');">
+    
+    <button>Delete</button>
+    
+ </a>
+    
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br>
+
+<a href="/add-question/{{ quiz.id }}">
+    <button class="btn btn-open">
+        Add Question
+    </button>
+</a>
+
+</div>
+
+</body>
+
+</html>

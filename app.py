@@ -25,6 +25,44 @@ if SUPABASE_URL and SUPABASE_KEY:
 else:
     print("Supabase credentials missing")
 
+
+
+# -------------------------------
+# Quiz Database Functions
+# -------------------------------
+
+def get_active_quiz():
+    response = (
+        supabase.table("quizzes")
+        .select("*")
+        .eq("is_active", True)
+        .single()
+        .execute()
+    )
+
+    return response.data
+
+
+def get_quiz_questions(quiz_id):
+
+    response = (
+        supabase.table("quiz_questions")
+        .select("*")
+        .eq("quiz_id", quiz_id)
+        .order("display_order")
+        .execute()
+    )
+
+    return response.data
+
+
+quiz = get_active_quiz()
+
+print("--ACTIVE QUIZ:")
+print(quiz)
+
+
+
 CSV_FILE = 'results.csv'
 
 #QUIZ_OPEN = True
@@ -204,10 +242,12 @@ def landing():
 @app.route('/student', methods=['GET', 'POST'])
 def student_login():
 
-    setting = supabase.table("quiz_settings").select("quiz_open").eq("id", 1).execute()
-    quiz_open = setting.data[0]["quiz_open"]
+    active_quiz = get_active_quiz()
 
-    if not quiz_open:
+    if not active_quiz:
+        return "No active quiz has been configured."
+
+    if not active_quiz["quiz_open"]:
         return render_template("quiz_closed.html")
 
 
@@ -269,12 +309,34 @@ def quiz():
     if session.get('role') != 'student':
         return redirect(url_for('landing'))
 
+    active_quiz = get_active_quiz()
+
+    questions = get_quiz_questions(active_quiz["id"])
+
+    print("QUESTIONS FROM DATABASE:")
+    print(questions)
+
+    formatted_questions = []
+
+    for q in questions:
+        formatted_questions.append({
+            "id": q["id"],
+            "text": q["question"],
+            "options": [
+                q["option1"],
+                q["option2"],
+                q["option3"],
+                q["option4"]
+            ],
+            "image": q.get("image_url")
+        })
+
     return render_template(
         'index.html',
-        questions=quiz_data,
-        user=session['student_name']
+        questions=formatted_questions,
+        user=session['student_name'],
+        quiz=active_quiz
     )
-
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -282,13 +344,16 @@ def submit():
     if session.get('role') != 'student':
         return redirect(url_for('landing'))
 
+    active_quiz = get_active_quiz()
+    questions = get_quiz_questions(active_quiz["id"])
+
     score = 0
-    total = len(quiz_data)
+    total = len(questions)
 
     review_data = []
     answers_data = {}
 
-    for q in quiz_data:
+    for q in questions:
 
         answer = request.form.get(f"question_{q['id']}")
 
@@ -298,7 +363,7 @@ def submit():
             score += 1
 
         review_data.append({
-            'question': q['text'],
+            'question': q['question'],
             'user_answer': answer,
             'correct_answer': q['correct'],
             'is_correct': correct
@@ -310,7 +375,7 @@ def submit():
             'status': 'Correct' if correct else 'Wrong'
         }
 
-    percentage = round((score / total) * 100, 2)
+    percentage = round((score / total) * 100, 2) if total else 0
 
 
     # SAVE RESULT TO SUPABASE
@@ -416,6 +481,256 @@ def admin():
     highest_score=highest_score,
     latest_submission=latest_submission
 )
+
+
+
+@app.route('/manage-quiz')
+def manage_quiz():
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('landing'))
+
+    response = (
+        supabase.table("quizzes")
+        .select("*")
+        .order("id")
+        .execute()
+    )
+
+    quizzes = response.data
+
+    return render_template(
+        "manage_quiz.html",
+        quizzes=quizzes
+    )
+
+
+@app.route('/activate-quiz/<int:quiz_id>', methods=['POST'])
+def activate_quiz(quiz_id):
+
+    if session.get("role") != "admin":
+        return redirect(url_for("landing"))
+
+    # Deactivate every quiz
+    supabase.table("quizzes").update({
+        "is_active": False,
+        "quiz_open": False
+    }).neq("id", 0).execute()
+
+    # Activate selected quiz
+    supabase.table("quizzes").update({
+        "is_active": True,
+        "quiz_open": True
+    }).eq("id", quiz_id).execute()
+
+    return redirect(url_for("manage_quiz"))
+
+
+
+@app.route('/manage-questions/<int:quiz_id>')
+def manage_questions(quiz_id):
+
+    if session.get("role") != "admin":
+        return redirect(url_for("landing"))
+
+    quiz = (
+        supabase.table("quizzes")
+        .select("*")
+        .eq("id", quiz_id)
+        .single()
+        .execute()
+    ).data
+
+    questions = (
+        supabase.table("quiz_questions")
+        .select("*")
+        .eq("quiz_id", quiz_id)
+        .order("display_order")
+        .execute()
+    ).data
+
+    return render_template(
+        "manage_questions.html",
+        quiz=quiz,
+        questions=questions
+    )
+
+
+
+
+
+@app.route('/delete-question/<int:question_id>')
+def delete_question(question_id):
+
+    if session.get("role") != "admin":
+        return redirect(url_for("landing"))
+
+    # Find which quiz this question belongs to
+    question = supabase.table("quiz_questions") \
+        .select("quiz_id") \
+        .eq("id", question_id) \
+        .single() \
+        .execute()
+
+    quiz_id = question.data["quiz_id"]
+
+    # Delete the question
+    supabase.table("quiz_questions") \
+        .delete() \
+        .eq("id", question_id) \
+        .execute()
+
+    return redirect(url_for("manage_questions", quiz_id=quiz_id))
+
+
+
+
+
+
+
+@app.route('/create-quiz', methods=['GET', 'POST'])
+def create_quiz():
+
+    if session.get("role") != "admin":
+        return redirect(url_for("landing"))
+
+    if request.method == "POST":
+
+        supabase.table("quizzes").insert({
+
+            "title": request.form["title"],
+
+            "description": request.form["description"],
+
+            "rules": request.form["rules"],
+
+            "pass_mark": int(request.form["pass_mark"]),
+
+            "time_limit": int(request.form["time_limit"])
+            if request.form["time_limit"] else None,
+
+            "quiz_open": False,
+
+            "is_active": False
+
+        }).execute()
+
+        return redirect(url_for("manage_quiz"))
+
+    return render_template("create_quiz.html")
+
+
+
+
+
+
+
+
+
+@app.route('/edit-question/<int:question_id>', methods=['GET', 'POST'])
+def edit_question(question_id):
+
+    if session.get("role") != "admin":
+        return redirect(url_for("landing"))
+
+    response = supabase.table("quiz_questions") \
+        .select("*") \
+        .eq("id", question_id) \
+        .single() \
+        .execute()
+
+    question = response.data
+
+    if request.method == "POST":
+
+        correct_index = request.form["correct_option"]
+        correct_answer = request.form[f"option{correct_index}"]
+
+        supabase.table("quiz_questions") \
+            .update({
+
+                "question": request.form["question"],
+
+                "option1": request.form["option1"],
+                "option2": request.form["option2"],
+                "option3": request.form["option3"],
+                "option4": request.form["option4"],
+
+                "correct": correct_answer,
+
+                "question_type": request.form["question_type"],
+
+                "display_order": int(request.form["display_order"]),
+
+                "image_url": request.form["image_url"],
+
+                "explanation": request.form["explanation"]
+
+            }) \
+            .eq("id", question_id) \
+            .execute()
+
+        return redirect(url_for(
+            "manage_questions",
+            quiz_id=question["quiz_id"]
+        ))
+
+    return render_template(
+        "edit_question.html",
+        question=question
+    )
+
+
+
+
+
+
+
+@app.route('/add-question/<int:quiz_id>', methods=['GET', 'POST'])
+def add_question(quiz_id):
+
+    if session.get("role") != "admin":
+        return redirect(url_for("landing"))
+
+    if request.method == "POST":
+        correct_index = request.form["correct_option"]
+
+        correct_answer = request.form[f"option{correct_index}"]
+
+        supabase.table("quiz_questions").insert({
+
+            "quiz_id": quiz_id,
+
+            "question": request.form["question"],
+
+            "option1": request.form["option1"],
+            "option2": request.form["option2"],
+            "option3": request.form["option3"],
+            "option4": request.form["option4"],
+
+            "correct": correct_answer,
+
+            "question_type": request.form["question_type"],
+
+            "display_order": int(request.form["display_order"]),
+
+            "image_url": request.form["image_url"],
+
+            "explanation": request.form["explanation"]
+
+        }).execute()
+
+        return redirect(url_for("manage_questions", quiz_id=quiz_id))
+
+    return render_template(
+        "add_question.html",
+        quiz_id=quiz_id
+    )
+
+
+
+
+
 
 
 

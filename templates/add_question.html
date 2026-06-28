@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Add Question</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/admin.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Add Question</h1>
+
+<form method="POST">
+
+<p>Question</p>
+
+<textarea
+name="question"
+rows="4"
+required></textarea>
+
+<h3>Answers</h3>
+
+<table style="width:100%;">
+
+<tr>
+    <th>Correct</th>
+    <th>Answer</th>
+</tr>
+
+<tr>
+
+<td>
+<input
+type="radio"
+name="correct_option"
+value="1"
+required>
+</td>
+
+<td>
+<input
+type="text"
+name="option1"
+required>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+<input
+type="radio"
+name="correct_option"
+value="2">
+</td>
+
+<td>
+<input
+type="text"
+name="option2"
+required>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+<input
+type="radio"
+name="correct_option"
+value="3">
+</td>
+
+<td>
+<input
+type="text"
+name="option3">
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+<input
+type="radio"
+name="correct_option"
+value="4">
+</td>
+
+<td>
+<input
+type="text"
+name="option4">
+</td>
+
+</tr>
+
+</table>
+
+<select name="question_type">
+
+<option value="multiple_choice" selected>
+Multiple Choice
+</option>
+
+<option value="true_false">
+True / False
+</option>
+
+</select>
+
+<p>Display Order</p>
+
+<input
+type="number"
+name="display_order"
+value="1"
+required>
+
+<p>Image URL (optional)</p>
+
+<input
+type="text"
+name="image_url">
+
+<p>Explanation (optional)</p>
+
+<textarea
+name="explanation"
+rows="4"></textarea>
+
+<br><br>
+
+<button class="btn btn-open">
+
+Add Question
+
+</button>
+
+</form>
+
+</div>
+
+</body>
+
+</html>

@@ -55,7 +55,7 @@
 
 <script>
 
-    let totalTime = 8 * 60;
+    let totalTime = {{ (quiz.time_limit or 10) * 60 }};
 
     function updateTimer() {
 
@@ -89,7 +89,7 @@
     <div class="card" style="background: #673ab7; color: white; text-align: center;">
         <h1>Quiz Portal</h1>
         <h2 id="timer" style="margin-top:10px;">
-            Time Remaining: 30:00
+            Time Remaining: {{ quiz.time_limit or 10 }}:00
         </h2>
 
         <p>

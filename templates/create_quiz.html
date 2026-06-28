@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Create Quiz</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/admin.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Create Quiz</h1>
+
+<form method="POST">
+
+<p>Quiz Title</p>
+
+<input
+type="text"
+name="title"
+required>
+
+<p>Description</p>
+
+<textarea
+name="description"
+rows="3"></textarea>
+
+<p>Rules</p>
+
+<textarea
+name="rules"
+rows="5"></textarea>
+
+<p>Pass Mark (%)</p>
+
+<input
+type="number"
+name="pass_mark"
+value="50"
+required>
+
+<p>Time Limit (minutes)</p>
+
+<input
+type="number"
+name="time_limit">
+
+<br><br>
+
+<button class="btn btn-open">
+
+Create Quiz
+
+</button>
+
+</form>
+
+</div>
+
+</body>
+
+</html>

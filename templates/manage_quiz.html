@@ -53,7 +53,16 @@
 <td>
     {{ quiz.is_active }}
 
-    {% if not quiz.is_active %}
+    {% if quiz.is_active %}
+    <br><br>
+
+    <form action="/deactivate-quiz/{{ quiz.id }}" method="POST">
+        <button class="btn btn-close">
+            Deactivate
+        </button>
+    </form>
+
+    {% else %}
     <br><br>
 
     <form action="/activate-quiz/{{ quiz.id }}" method="POST">

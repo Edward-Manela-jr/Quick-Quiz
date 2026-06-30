@@ -28,6 +28,12 @@
 
         <h2>Quiz Status</h2>
 
+        {% if active_quiz %}
+            <p>Active quiz: <strong>{{ active_quiz.title }}</strong></p>
+        {% else %}
+            <p>No quiz activated. Use <a href="/manage-quiz">Manage Quizzes</a> to activate one.</p>
+        {% endif %}
+
         {% if quiz_open %}
             <p class="status-open">OPEN</p>
         {% else %}
@@ -35,13 +41,13 @@
         {% endif %}
 
         <form action="/open-quiz" method="POST" style="display:inline;">
-            <button class="btn btn-open" {% if quiz_open %}disabled{% endif %}>
+            <button class="btn btn-open" {% if quiz_open or not active_quiz %}disabled{% endif %}>
                 Open Quiz
             </button>
         </form>
 
         <form action="/close-quiz" method="POST" style="display:inline;">
-            <button class="btn btn-close" {% if not quiz_open %}disabled{% endif %}>
+            <button class="btn btn-close" {% if not quiz_open or not active_quiz %}disabled{% endif %}>
                 Close Quiz
             </button>
         </form>

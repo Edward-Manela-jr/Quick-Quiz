@@ -36,11 +36,13 @@ def get_active_quiz():
         supabase.table("quizzes")
         .select("*")
         .eq("is_active", True)
-        .single()
+        .limit(1)
         .execute()
     )
 
-    return response.data
+    if response.data:
+        return response.data[0]
+    return None
 
 
 def get_quiz_questions(quiz_id):
@@ -427,16 +429,14 @@ def admin():
         return redirect(url_for('landing'))
 
     results = []
+    active_quiz = get_active_quiz()
+    quiz_open = active_quiz["quiz_open"] if active_quiz else False
+    total_participants = 0
+    average_score = 0
+    highest_score = 0
+    latest_submission = "N/A"
 
     try:
-
-        # Read quiz status
-        setting = supabase.table("quiz_settings") \
-            .select("quiz_open") \
-            .eq("id", 1) \
-            .execute()
-
-        quiz_open = setting.data[0]["quiz_open"]
 
         # Read quiz results
         response = supabase.table("quiz_results2") \
@@ -460,22 +460,14 @@ def admin():
 
             latest_submission = results[0]["date"]
 
-        else:
-
-            average_score = 0
-            highest_score = 0
-            latest_submission = "N/A"
-
-
-
     except Exception as e:
         print("ADMIN ERROR:", e)
-        quiz_open = False
 
     return render_template(
     'admin.html',
     results=results,
     quiz_open=quiz_open,
+    active_quiz=active_quiz,
     total_participants=total_participants,
     average_score=average_score,
     highest_score=highest_score,
@@ -525,6 +517,19 @@ def activate_quiz(quiz_id):
 
     return redirect(url_for("manage_quiz"))
 
+
+@app.route('/deactivate-quiz/<int:quiz_id>', methods=['POST'])
+def deactivate_quiz(quiz_id):
+
+    if session.get("role") != "admin":
+        return redirect(url_for("landing"))
+
+    supabase.table("quizzes").update({
+        "is_active": False,
+        "quiz_open": False
+    }).eq("id", quiz_id).execute()
+
+    return redirect(url_for("manage_quiz"))
 
 
 @app.route('/manage-questions/<int:quiz_id>')
@@ -740,10 +745,11 @@ def open_quiz():
     if session.get('role') != 'admin':
         return redirect(url_for('landing'))
 
-    supabase.table("quiz_settings") \
-        .update({"quiz_open": True}) \
-        .eq("id", 1) \
-        .execute()
+    active_quiz = get_active_quiz()
+    if active_quiz:
+        supabase.table("quizzes").update({
+            "quiz_open": True
+        }).eq("id", active_quiz["id"]).execute()
 
     return redirect(url_for('admin'))
 
@@ -754,10 +760,11 @@ def close_quiz():
     if session.get('role') != 'admin':
         return redirect(url_for('landing'))
 
-    supabase.table("quiz_settings") \
-        .update({"quiz_open": False}) \
-        .eq("id", 1) \
-        .execute()
+    active_quiz = get_active_quiz()
+    if active_quiz:
+        supabase.table("quizzes").update({
+            "quiz_open": False
+        }).eq("id", active_quiz["id"]).execute()
 
     return redirect(url_for('admin'))
 

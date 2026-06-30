@@ -18,3 +18,21 @@ GIT_ASKPASS= git push origin main
 git add app.py templates/student_login.html
 
 git commit -m "Replace quiz with density and pressure questions"
+
+
+
+
+How to use it
+Goal	Where	Button
+Temporarily stop students taking the quiz
+Admin dashboard
+Close Quiz
+Let students take it again
+Admin dashboard
+Open Quiz
+Fully turn off the quiz (no active quiz)
+Manage Quizzes
+Deactivate
+Switch to a different quiz
+Manage Quizzes
+Activate on another quiz

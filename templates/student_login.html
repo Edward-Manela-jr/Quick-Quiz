@@ -76,23 +76,18 @@
 
 <div class="box">
 
-    <h1>--ZMD-Quick Quiz Portal--(Topic: Atmospheric Stability )</h1>
+    <h1>{{ quiz.title }}</h1>
 
     <div class="instructions">
 
-        <h2>Allowed Time: 10 Minutes</h2>
+        <h2>Allowed Time: {{ quiz.time_limit or 10 }} Minutes</h2>
 
-        <p><strong>Total Questions:</strong> 20</p>
+        <p><strong>Total Questions:</strong> {{ question_count }}</p>
 
         <h3>Instructions</h3>
 
-        <!-- <p>
-            i) This quiz contains some calculations.
-            Click the most appropriate answer.
-        </p> -->
-
         <p>
-            i) Enter your details and Click <strong>Start Quiz</strong> to begin.
+            i) Enter your details and click <strong>Start Quiz</strong> to begin.
             The timer will start immediately.
         </p>
 
@@ -101,8 +96,8 @@
         </p>
 
         <p>
-            ii) Your responses will be submitted automatically once
-            the 10 minutes have elapsed.
+            iii) Your responses will be submitted automatically once
+            the {{ quiz.time_limit or 10 }} minutes have elapsed.
         </p>
 
     </div>

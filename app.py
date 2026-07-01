@@ -58,6 +58,89 @@ def get_quiz_questions(quiz_id):
     return response.data
 
 
+QUIZ_SUBMIT_GRACE_SECONDS = 60
+
+
+def get_quiz_duration_seconds(quiz):
+    return int(quiz.get("time_limit") or 10) * 60
+
+
+def get_quiz_elapsed_seconds():
+    started_at = session.get("quiz_started_at")
+    if not started_at:
+        return None
+    return (datetime.now() - datetime.fromisoformat(started_at)).total_seconds()
+
+
+def get_quiz_remaining_seconds():
+    duration = session.get("quiz_duration_seconds")
+    elapsed = get_quiz_elapsed_seconds()
+    if duration is None or elapsed is None:
+        return None
+    return max(0, int(duration - elapsed))
+
+
+def is_past_quiz_deadline(grace_seconds=0):
+    duration = session.get("quiz_duration_seconds")
+    elapsed = get_quiz_elapsed_seconds()
+    if duration is None or elapsed is None:
+        return False
+    return elapsed > duration + grace_seconds
+
+
+def start_quiz_session(quiz):
+    session["quiz_started_at"] = datetime.now().isoformat()
+    session["quiz_duration_seconds"] = get_quiz_duration_seconds(quiz)
+    session["active_quiz_id"] = quiz["id"]
+    session.pop("quiz_submitted", None)
+
+
+def quiz_session_valid_for(quiz):
+    return (
+        session.get("quiz_started_at")
+        and session.get("active_quiz_id") == quiz["id"]
+        and not session.get("quiz_submitted")
+    )
+
+
+def has_already_attempted_quiz(email, quiz_id):
+    email_lower = email.lower()
+
+    if supabase:
+        try:
+            response = (
+                supabase.table("quiz_results2")
+                .select("email")
+                .eq("quiz_id", quiz_id)
+                .execute()
+            )
+
+            for result in response.data:
+                if result.get("email", "").lower() == email_lower:
+                    return True
+
+        except Exception as e:
+            print("DUPLICATE CHECK SUPABASE ERROR:", e)
+
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, 'r', newline='') as file:
+            reader = csv.reader(file)
+            next(reader, None)
+
+            for row in reader:
+                if len(row) < 2 or row[1].lower() != email_lower:
+                    continue
+
+                if len(row) > 7 and row[7]:
+                    try:
+                        if int(row[7]) == quiz_id:
+                            return True
+                    except ValueError:
+                        continue
+
+    return False
+
+
 quiz = get_active_quiz()
 
 print("--ACTIVE QUIZ:")
@@ -233,7 +316,8 @@ if not os.path.exists(CSV_FILE):
             'Total',
             'Percentage',
             'Answers',
-            'Date'
+            'Date',
+            'Quiz ID'
         ])
 
 
@@ -252,41 +336,38 @@ def student_login():
     if not active_quiz["quiz_open"]:
         return render_template("quiz_closed.html")
 
+    if session.get('quiz_submitted'):
+        return render_template('already_submitted.html')
+
+    if quiz_session_valid_for(active_quiz):
+        return redirect(url_for('quiz'))
 
     if request.method == 'POST':
 
         name = request.form.get('name')
         email = request.form.get('email')
 
-        # Prevent multiple attempts using same email
-        # Prevent multiple attempts using same email
-        if os.path.exists(CSV_FILE):
-
-            with open(CSV_FILE, 'r') as file:
-
-                reader = csv.reader(file)
-
-                for row in reader:
-
-                    if len(row) > 1:
-
-                        existing_email = row[1]
-
-                        if existing_email.lower() == email.lower():
-
-                            return """
-                            <h2 style='color:red; text-align:center; margin-top:50px;'>
-                                You have already attempted this quiz.
-                            </h2>
-                            """
+        if has_already_attempted_quiz(email, active_quiz["id"]):
+            return """
+            <h2 style='color:red; text-align:center; margin-top:50px;'>
+                You have already attempted this quiz.
+            </h2>
+            """
 
         session['student_name'] = name
         session['student_email'] = email
         session['role'] = 'student'
+        start_quiz_session(active_quiz)
 
         return redirect(url_for('quiz'))
 
-    return render_template('student_login.html')
+    questions = get_quiz_questions(active_quiz["id"])
+
+    return render_template(
+        'student_login.html',
+        quiz=active_quiz,
+        question_count=len(questions)
+    )
 
 @app.route('/admin-login', methods=['GET', 'POST'])
 def admin_login():
@@ -313,10 +394,21 @@ def quiz():
 
     active_quiz = get_active_quiz()
 
-    questions = get_quiz_questions(active_quiz["id"])
+    if not active_quiz:
+        return "No active quiz has been configured."
 
-    print("QUESTIONS FROM DATABASE:")
-    print(questions)
+    if not active_quiz["quiz_open"]:
+        return render_template("quiz_closed.html")
+
+    if session.get('quiz_submitted'):
+        return render_template('already_submitted.html')
+
+    if not quiz_session_valid_for(active_quiz):
+        return redirect(url_for('student_login'))
+
+    remaining_seconds = get_quiz_remaining_seconds()
+
+    questions = get_quiz_questions(active_quiz["id"])
 
     formatted_questions = []
 
@@ -337,7 +429,8 @@ def quiz():
         'index.html',
         questions=formatted_questions,
         user=session['student_name'],
-        quiz=active_quiz
+        quiz=active_quiz,
+        remaining_seconds=remaining_seconds
     )
 
 @app.route('/submit', methods=['POST'])
@@ -346,7 +439,24 @@ def submit():
     if session.get('role') != 'student':
         return redirect(url_for('landing'))
 
+    if session.get('quiz_submitted'):
+        return render_template('already_submitted.html')
+
     active_quiz = get_active_quiz()
+
+    if not active_quiz:
+        return redirect(url_for('landing'))
+
+    if session.get('active_quiz_id') != active_quiz['id']:
+        return redirect(url_for('student_login'))
+
+    if not session.get('quiz_started_at'):
+        return redirect(url_for('student_login'))
+
+    if is_past_quiz_deadline(grace_seconds=QUIZ_SUBMIT_GRACE_SECONDS):
+        session['quiz_submitted'] = True
+        return render_template('time_expired.html')
+
     questions = get_quiz_questions(active_quiz["id"])
 
     score = 0
@@ -387,6 +497,7 @@ def submit():
             supabase.table("quiz_results2").insert({
                 "name": session['student_name'],
                 "email": session['student_email'],
+                "quiz_id": active_quiz["id"],
                 "score": score,
                 "total": total,
                 "percentage": percentage,
@@ -410,8 +521,11 @@ def submit():
             total,
             percentage,
             json.dumps(answers_data),
-            datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            active_quiz["id"]
         ])
+
+    session['quiz_submitted'] = True
 
     return render_template(
         'results.html',

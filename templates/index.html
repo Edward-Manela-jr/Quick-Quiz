@@ -50,46 +50,20 @@
         .btn:hover {
             background: #5a2ea6;
         }
+
+        .btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
     </style>
 </head>
-
-<script>
-
-    let totalTime = {{ (quiz.time_limit or 10) * 60 }};
-
-    function updateTimer() {
-
-        let minutes = Math.floor(totalTime / 60);
-        let seconds = totalTime % 60;
-
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-
-        document.getElementById('timer').innerHTML =
-            `Time Remaining: ${minutes}:${seconds}`;
-
-        if (totalTime <= 0) {
-
-            alert("Time is up! Your quiz will now be submitted.");
-
-            document.forms[0].submit();
-
-        }
-
-        totalTime--;
-
-    }
-
-    setInterval(updateTimer, 1000);
-
-</script>
-
 
 <body>
 
     <div class="card" style="background: #673ab7; color: white; text-align: center;">
         <h1>Quiz Portal</h1>
         <h2 id="timer" style="margin-top:10px;">
-            Time Remaining: {{ quiz.time_limit or 10 }}:00
+            Time Remaining: {{ remaining_seconds // 60 }}:{{ '%02d' % (remaining_seconds % 60) }}
         </h2>
 
         <p>
@@ -99,7 +73,7 @@
         </p>
     </div>
 
-    <form action="/submit" method="POST">
+    <form id="quiz-form" action="/submit" method="POST">
 
         {% for q in questions %}
 
@@ -138,13 +112,79 @@
 
         {% if questions %}
 
-        <button type="submit" class="btn">
+        <button type="submit" id="submit-btn" class="btn">
             Submit Assessment
         </button>
 
         {% endif %}
 
     </form>
+
+    <script>
+        let totalTime = {{ remaining_seconds }};
+        let submitted = false;
+        let timerInterval = null;
+        const quizForm = document.getElementById('quiz-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}:${secs < 10 ? '0' + secs : secs}`;
+        }
+
+        function lockQuizForm() {
+            submitted = true;
+            if (timerInterval !== null) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (submitBtn) {
+                submitBtn.disabled = true;
+            }
+            quizForm.querySelectorAll('[required]').forEach(function (el) {
+                el.removeAttribute('required');
+            });
+        }
+
+        function autoSubmitQuiz() {
+            if (submitted) {
+                return;
+            }
+
+            lockQuizForm();
+            alert("Time is up! Your quiz will now be submitted.");
+            quizForm.submit();
+        }
+
+        function updateTimer() {
+            document.getElementById('timer').innerHTML =
+                `Time Remaining: ${formatTime(totalTime)}`;
+
+            if (totalTime <= 0) {
+                autoSubmitQuiz();
+                return;
+            }
+
+            totalTime--;
+        }
+
+        quizForm.addEventListener('submit', function (e) {
+            if (submitted) {
+                e.preventDefault();
+                return;
+            }
+
+            lockQuizForm();
+        });
+
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        if (totalTime <= 0) {
+            autoSubmitQuiz();
+        }
+    </script>
 
 </body>
 </html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submission Failed</title>
+</head>
+<body style="font-family: Arial; text-align:center; margin-top:100px;">
+
+    <h1 style="color:red;">Could Not Save Your Results</h1>
+
+    <p>
+        Your answers were scored, but we could not save them to the database.
+        Please contact your instructor and try again.
+    </p>
+
+    {% if error_message %}
+    <p style="color:#666; font-size:14px; max-width:600px; margin:20px auto;">
+        Error: {{ error_message }}
+    </p>
+    {% endif %}
+
+    <p>
+        <a href="/logout">Return to home</a>
+    </p>
+
+</body>
+</html>

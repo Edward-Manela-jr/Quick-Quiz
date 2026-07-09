@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file
 import csv
+import io
 import os
 import json
 from datetime import datetime
@@ -103,21 +104,63 @@ def quiz_session_valid_for(quiz):
     )
 
 
+def normalize_email(email):
+    if not email:
+        return ""
+    return email.strip().lower()
+
+
+def save_quiz_result_to_supabase(name, email, quiz_id, score, total, percentage, answers_data):
+    if not supabase:
+        return True, None
+
+    row = {
+        "name": name,
+        "email": normalize_email(email),
+        "quiz_id": quiz_id,
+        "score": score,
+        "total": total,
+        "percentage": percentage,
+        "answers": json.dumps(answers_data),
+        "date": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+    try:
+        supabase.table("quiz_results2").insert(row).execute()
+        return True, None
+    except Exception as insert_error:
+        print("SUPABASE INSERT ERROR:", insert_error)
+
+        try:
+            supabase.table("quiz_results2").upsert(
+                row,
+                on_conflict="email,quiz_id"
+            ).execute()
+            return True, None
+        except Exception as upsert_error:
+            print("SUPABASE UPSERT ERROR:", upsert_error)
+            return False, str(upsert_error)
+
+
 def has_already_attempted_quiz(email, quiz_id):
-    email_lower = email.lower()
+    email_normalized = normalize_email(email)
+
+    if not email_normalized:
+        return False
 
     if supabase:
         try:
             response = (
                 supabase.table("quiz_results2")
-                .select("email")
+                .select("id")
                 .eq("quiz_id", quiz_id)
+                .eq("email", email_normalized)
+                .limit(1)
                 .execute()
             )
 
-            for result in response.data:
-                if result.get("email", "").lower() == email_lower:
-                    return True
+            if response.data:
+                return True
 
         except Exception as e:
             print("DUPLICATE CHECK SUPABASE ERROR:", e)
@@ -128,7 +171,7 @@ def has_already_attempted_quiz(email, quiz_id):
             next(reader, None)
 
             for row in reader:
-                if len(row) < 2 or row[1].lower() != email_lower:
+                if len(row) < 2 or normalize_email(row[1]) != email_normalized:
                     continue
 
                 if len(row) > 7 and row[7]:
@@ -344,8 +387,15 @@ def student_login():
 
     if request.method == 'POST':
 
-        name = request.form.get('name')
-        email = request.form.get('email')
+        name = (request.form.get('name') or '').strip()
+        email = normalize_email(request.form.get('email'))
+
+        if not name or not email:
+            return """
+            <h2 style='color:red; text-align:center; margin-top:50px;'>
+                Please enter your name and email.
+            </h2>
+            """
 
         if has_already_attempted_quiz(email, active_quiz["id"]):
             return """
@@ -489,34 +539,28 @@ def submit():
 
     percentage = round((score / total) * 100, 2) if total else 0
 
+    saved, save_error = save_quiz_result_to_supabase(
+        session['student_name'],
+        session['student_email'],
+        active_quiz["id"],
+        score,
+        total,
+        percentage,
+        answers_data
+    )
 
-    # SAVE RESULT TO SUPABASE
-    # Save to Supabase
-    if supabase:
-        try:
-            supabase.table("quiz_results2").insert({
-                "name": session['student_name'],
-                "email": session['student_email'],
-                "quiz_id": active_quiz["id"],
-                "score": score,
-                "total": total,
-                "percentage": percentage,
-                "answers": json.dumps(answers_data),
-                "date": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            }).execute()
+    if not saved:
+        return render_template(
+            'submit_error.html',
+            error_message=save_error
+        )
 
-            print("Saved to Supabase")
-
-        except Exception as e:
-            print("SUPABASE ERROR:", e)
-
-    # SAVE RESULT TO CSV
     with open(CSV_FILE, 'a', newline='') as file:
         writer = csv.writer(file)
 
         writer.writerow([
             session['student_name'],
-            session['student_email'],
+            normalize_email(session['student_email']),
             score,
             total,
             percentage,
@@ -917,6 +961,70 @@ def review(result_id):
 
     except Exception as e:
         return f"Review Error: {e}"
+
+def get_all_quiz_results():
+    if not supabase:
+        return []
+
+    try:
+        response = (
+            supabase.table("quiz_results2")
+            .select("*")
+            .order("id", desc=True)
+            .execute()
+        )
+        return response.data or []
+    except Exception as e:
+        print("RESULTS FETCH ERROR:", e)
+        return []
+
+
+def build_results_csv_bytes(results):
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow([
+        'Name',
+        'Email',
+        'Quiz ID',
+        'Score',
+        'Total',
+        'Percentage',
+        'Date',
+        'Answers'
+    ])
+
+    for result in results:
+        writer.writerow([
+            result.get('name', ''),
+            result.get('email', ''),
+            result.get('quiz_id', ''),
+            result.get('score', ''),
+            result.get('total', ''),
+            result.get('percentage', ''),
+            result.get('date', ''),
+            result.get('answers', ''),
+        ])
+
+    return buffer.getvalue().encode('utf-8')
+
+
+@app.route('/export-results')
+def export_results():
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('landing'))
+
+    results = get_all_quiz_results()
+    csv_bytes = build_results_csv_bytes(results)
+    filename = f"quiz_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+    return send_file(
+        io.BytesIO(csv_bytes),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=filename
+    )
+
 
 @app.route('/download-csv')
 def download_csv():

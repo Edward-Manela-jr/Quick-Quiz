@@ -98,6 +98,34 @@ header h1{
 
 }
 
+.btn-export{
+
+    background:#1f3c88;
+
+}
+
+a.btn{
+
+    text-decoration:none;
+    display:inline-block;
+
+}
+
+.section-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+
+}
+
+.section-header h2{
+
+    margin:0;
+
+}
+
 .btn:hover:not(:disabled){
 
     opacity:.9;

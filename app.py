@@ -126,20 +126,14 @@ def save_quiz_result_to_supabase(name, email, quiz_id, score, total, percentage,
     }
 
     try:
-        supabase.table("quiz_results2").insert(row).execute()
+        supabase.table("quiz_results2").upsert(
+            row,
+            on_conflict="email,quiz_id"
+        ).execute()
         return True, None
-    except Exception as insert_error:
-        print("SUPABASE INSERT ERROR:", insert_error)
-
-        try:
-            supabase.table("quiz_results2").upsert(
-                row,
-                on_conflict="email,quiz_id"
-            ).execute()
-            return True, None
-        except Exception as upsert_error:
-            print("SUPABASE UPSERT ERROR:", upsert_error)
-            return False, str(upsert_error)
+    except Exception as save_error:
+        print("SUPABASE SAVE ERROR:", save_error)
+        return False, str(save_error)
 
 
 def has_already_attempted_quiz(email, quiz_id):

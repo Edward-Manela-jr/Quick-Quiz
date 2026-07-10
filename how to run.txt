@@ -36,3 +36,108 @@ Deactivate
 Switch to a different quiz
 Manage Quizzes
 Activate on another quiz
+
+
+GitHub no longer allows password authentication for Git over HTTPS, so you'll need a Personal Access Token (PAT).
+
+1. Go to GitHub
+
+Log in and open:
+
+https://github.com/settings/tokens
+
+You'll see two options:
+
+Fine-grained tokens (recommended)
+Tokens (classic)
+
+For simplicity and compatibility with Git, I recommend Tokens (classic).
+
+2. Generate a new token
+
+Click:
+
+Generate new token (classic)
+
+3. Configure it
+Note
+
+Give it a name like:
+
+Quiz Deployment
+Expiration
+
+Choose:
+
+90 days
+or No expiration (if it's just for your own machine)
+4. Select scopes
+
+At minimum, check:
+
+repo
+
+This automatically includes:
+
+repo:status
+repo_deployment
+public_repo
+repo:invite
+
+If you're only pushing to private/public repositories, repo is all you need.
+
+5. Generate
+
+Click:
+
+Generate token
+
+GitHub will display something like:
+
+github_pat_11Axxxxxxxxxxxxxxxxxxxxxxxx
+
+Copy it immediately.
+
+You won't be able to see it again.
+
+6. Use it when Git asks
+
+The next time you run:
+
+git push origin main
+
+Git will ask:
+
+Username:
+
+Enter:
+
+your GitHub username
+
+Then:
+
+Password:
+
+Paste the Personal Access Token, not your GitHub password.
+
+7. If Git keeps using the old credentials
+
+If it doesn't prompt you, remove the cached credentials.
+
+On Ubuntu:
+
+git credential reject
+
+or, if you're using the credential store:
+
+git config --global --unset credential.helper
+
+Then run:
+
+git push origin main
+
+and Git will ask for your username and token again.
+
+If you're using Render, note that you typically don't need a PAT just to deploy. Once your GitHub repository is connected to Render, every git push origin main automatically triggers a new deployment. The PAT is only needed if GitHub is rejecting your push because your local Git credentials have expired.
+
+
